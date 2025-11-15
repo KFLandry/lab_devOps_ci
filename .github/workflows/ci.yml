@@ -384,15 +384,6 @@ jobs:
       - name: 🚀 Start services
         run: docker compose up -d
 
-      - name: ⏳ Wait for app
-        run: |
-          echo "Waiting for app to start..."
-          timeout 90 bash -c 'until curl -f -s -o /dev/null http://localhost:3000; do
-            echo "App not ready yet..."
-            sleep 3
-          done'
-          echo "✅ App is responding!"
-
       - name: 🧪 Run integration smoke tests
         run: |
           # Test que l'app répond (même sans /healthz)
@@ -430,7 +421,7 @@ jobs:
   # ✅ JOB FINAL : STATUT GLOBAL
   # ═══════════════════════════════════════════════════════════
   ci-success:
-    name: ✅ CI Pipeline Success
+    name: CI Pipeline Success
     runs-on: ubuntu-latest
     needs:
       [
