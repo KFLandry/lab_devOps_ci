@@ -52,6 +52,7 @@ export default tseslint.config(
   },
   {
     ignores: [
+      '.nitro/**',
       'dist/**',
       'build/**',
       'storybook-static/**',
