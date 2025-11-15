@@ -1,21 +1,65 @@
+# Dépendances (seront installées dans le container)
 node_modules
-.DS_Store
-dist
-dist-ssr
-*.local
-count.txt
-.env
-.nitro
-.tanstack
-.wrangler
+.pnpm-store
+pnpm-lock.yaml.bak
+
+# Fichiers de build
 .output
-.vinxi
-todos.json
+dist
+build
+.next
+.nuxt
+
+# Tests
+coverage
+.nyc_output
+playwright-report
+test-results
+
+# Storybook
 storybook-static
 
-# Playwright
-/test-results/
-/playwright-report/
-/blob-report/
-/playwright/.cache/
-/playwright/.auth/
+# Environment
+.env
+.env.local
+.env.*.local
+.env.production
+
+# Git
+.git
+.gitignore
+.github
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Documentation
+*.md
+!README.md
+docs
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporaires
+tmp
+temp
+*.tmp

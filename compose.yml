@@ -1,33 +1,70 @@
 services:
-  todo-app:
-    container_name: todo-app
-    build: .
-    ports:
-      - '3000:3000'
-    environment:
-      DATABASE_URL: ${DATABASE_URL:postgres://postgres:postgres@localhost:5432/todos}
-    depends_on:
-      - postgres
-    healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:3000/health']
-      interval: 1m30s
-      timeout: 30s
-      retries: 5
-      start_period: 30s
-    env_file:
-      - .env
   postgres:
     image: postgres:16.10-alpine3.21
+    container_name: todo-postgres
+    restart: unless-stopped
+
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:postgres_pwd}
-      POSTGRES_DB: ${POSTGRES_DB:todos}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-todos}
+      # Optimisations PostgreSQL
+      POSTGRES_INITDB_ARGS: '-E UTF8 --locale=C'
+
     ports:
-      - '5432:5432'
+      - '${POSTGRES_PORT:-5432}:5432'
+
     volumes:
       - pgdata:/var/lib/postgresql/data
-    env_file:
-      - .env
+
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-postgres}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+    networks:
+      - todo-network
+  todo-app:
+    container_name: todo-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+      cache_from:
+        - todo-app:latest
+
+    restart: unless-stopped
+
+    ports:
+      - '${APP_PORT:-3000}:3000'
+
+    environment:
+      NODE_ENV: production
+      # ⚠️ IMPORTANT : Utiliser le nom du service "postgres", pas "localhost"
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-todos}
+      PORT: 3000
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/healthz']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    networks:
+      - todo-network
 
 volumes:
   pgdata:
+    driver: local
+    name: todo-pgdata
+
+networks:
+  todo-network:
+    driver: bridge
+    name: todo-network
